@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+
+{% block title %}Placify | Company Registration{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4 p-md-5">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div>
+              <h1 class="h4 mb-1">Company Registration</h1>
+              <p class="text-muted mb-0">Create your company account. Admin approval is required before login.</p>
+            </div>
+            <a class="btn btn-outline-secondary" href="{{ url_for('main.login') }}">Go to Login</a>
+          </div>
+
+          <hr class="my-4">
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, msg in messages %}
+                <div class="alert alert-{% if category=='error' %}danger{% elif category=='warning' %}warning{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+                  {{ msg }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+          <form method="POST" class="needs-validation" novalidate>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <h2 class="h6 text-uppercase text-muted mb-0">Login Details</h2>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="username">Username</label>
+                <input class="form-control" type="text" name="username" id="username" required>
+                <div class="invalid-feedback">Username is required.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control" type="password" name="password" id="password" required>
+                <div class="invalid-feedback">Password is required.</div>
+              </div>
+
+              <div class="col-12 mt-2">
+                <h2 class="h6 text-uppercase text-muted mb-0">Company Details</h2>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="company_name">Company Name</label>
+                <input class="form-control" type="text" name="company_name" id="company_name" required>
+                <div class="invalid-feedback">Company name is required.</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="website">Website</label>
+                <input class="form-control" type="text" name="website" id="website" placeholder="https://...">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="hr_email">HR Email</label>
+                <input class="form-control" type="email" name="hr_email" id="hr_email">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label" for="hr_phone">HR Phone</label>
+                <input class="form-control" type="text" name="hr_phone" id="hr_phone">
+              </div>
+
+              <div class="col-12 mt-3">
+                <div class="d-grid">
+                  <button class="btn btn-primary btn-lg" type="submit">Register</button>
+                </div>
+                <p class="text-muted small mt-2 mb-0">
+                  Note: You will be able to login only after admin approval.
+                </p>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+(() => {
+  'use strict';
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+</script>
+{% endblock %}

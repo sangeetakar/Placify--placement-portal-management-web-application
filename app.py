@@ -1,9 +1,28 @@
-from flask import Flask ,render_template
+from flask import Flask 
+from flask_sqlalchemy import SQLAlchemy
+
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    return render_template('index.html') #open index.html from templates
+# -----------------------------
+# Load Configuration
+# -----------------------------
+from config import Config
+app.config.from_object(Config)
+
+# -----------------------------
+# Initialize Database
+# -----------------------------
+from models import db
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
+# -----------------------------
+# Register Blueprints
+# -----------------------------
+from routes import bp
+app.register_blueprint(bp)
 
 if __name__=='__main__':
     app.run(debug=True) #we can see the error in the browser as well
