@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}Company Dashboard • Placify{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">{{ company.company_name }}</h2>
+
+{% if company.is_blacklisted == 1 %}
+<div class="alert alert-danger">
+    Your company is blacklisted. Drives are disabled.
+</div>
+{% endif %}
+
+{% if company.is_blacklisted == 0 and company.approval_status == 'APPROVED' %}
+    <a href="{{ url_for('main.create_drive') }}" class="btn btn-primary mb-4">
+        Create New Drive
+    </a>
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Your Drives</h5>
+    </div>
+    <div class="card-body">
+        {% for drive in drives %}
+        <div class="border rounded p-3 mb-3">
+            <h6>{{ drive.job_title }}</h6>
+            <p class="mb-1"><strong>Status:</strong> {{ drive.drive_status }}</p>
+            <p class="mb-2"><strong>Active:</strong> {{ drive.is_active }}</p>
+
+            <a href="{{ url_for('main.view_applications', drive_id=drive.drive_id) }}"
+               class="btn btn-sm btn-outline-primary">View Applications</a>
+
+            {% if drive.is_active == 1 %}
+                <a href="{{ url_for('main.close_drive', drive_id=drive.drive_id) }}"
+                   class="btn btn-sm btn-outline-danger">Close</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

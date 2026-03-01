@@ -15,9 +15,10 @@ app.config.from_object(Config)
 from models import db
 db.init_app(app)
 
-with app.app_context():
-    db.create_all()
+from models import init_db
 
+with app.app_context():
+    init_db()
 # -----------------------------
 # Register Blueprints
 # -----------------------------

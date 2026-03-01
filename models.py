@@ -115,7 +115,6 @@ class Student(db.Model):
     graduation_year = db.Column(db.Integer, nullable=True)
 
     # Option 1 resume storage: keep only path in DB
-    resume_path = db.Column(db.String(500), nullable=True)
 
     approval_status = db.Column(db.String(20), nullable=False, default=APPROVAL_PENDING)
     is_blacklisted = db.Column(db.Integer, nullable=False, default=0)
@@ -269,3 +268,21 @@ def company_blacklist_cascade(mapper, connection, target: Company):
 # -----------------------------
 def init_db():
     db.create_all()
+
+    # Check if admin already exists
+    existing_admin = User.query.filter_by(role=ROLE_ADMIN).first()
+
+    if not existing_admin:
+        admin = User(
+            username="admin",
+            role=ROLE_ADMIN,
+            is_active=1,
+        )
+        admin.set_password("password")
+
+        db.session.add(admin)
+        db.session.commit()
+
+        print("Admin user created successfully.")
+    else:
+        print("Admin already exists.")

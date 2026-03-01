@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+
+{% block title %}Student Dashboard • Placify{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Welcome {{ student.full_name }}</h2>
+
+{% if student.is_blacklisted == 1 %}
+<div class="alert alert-danger">
+    You are blacklisted and cannot apply for drives.
+</div>
+{% endif %}
+
+<!-- ================= AVAILABLE DRIVES ================= -->
+<div class="card shadow-sm mb-5">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Available Drives</h5>
+    </div>
+    <div class="card-body">
+
+        {% if approved_drives %}
+            {% for drive in approved_drives %}
+            <div class="border rounded p-3 mb-3">
+
+                <h6 class="mb-1">{{ drive.job_title }}</h6>
+
+                <p class="mb-1">
+                    <strong>Company:</strong> {{ drive.company.company_name }}
+                </p>
+
+                {% if drive.application_deadline %}
+                <p class="mb-1">
+                    <strong>Deadline:</strong> {{ drive.application_deadline.strftime('%d %b %Y') }}
+                </p>
+                {% endif %}
+
+                {% if student.is_blacklisted == 0 %}
+                    {% set already_applied = false %}
+                    {% for app in applications %}
+                        {% if app.drive_id == drive.drive_id %}
+                            {% set already_applied = true %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if already_applied %}
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            Already Applied
+                        </button>
+                    {% else %}
+                        <a href="{{ url_for('main.apply_drive', drive_id=drive.drive_id) }}"
+                           class="btn btn-primary btn-sm">
+                            Apply
+                        </a>
+                    {% endif %}
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No drives available at the moment.</p>
+        {% endif %}
+
+    </div>
+</div>
+
+
+<!-- ================= YOUR APPLICATIONS ================= -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Your Applications</h5>
+    </div>
+    <div class="card-body">
+
+        {% for app in applications %}
+        <div class="border rounded p-3 mb-3">
+
+            <strong>{{ app.drive.job_title }}</strong>
+
+            <!-- Status Badge -->
+            {% if app.status == 'APPLIED' %}
+                <span class="badge bg-secondary">{{ app.status }}</span>
+            {% elif app.status == 'SHORTLISTED' %}
+                <span class="badge bg-warning text-dark">{{ app.status }}</span>
+            {% elif app.status == 'SELECTED' %}
+                <span class="badge bg-success">{{ app.status }}</span>
+            {% elif app.status == 'REJECTED' %}
+                <span class="badge bg-danger">{{ app.status }}</span>
+            {% endif %}
+
+            <div class="small text-muted mt-1">
+                Applied on {{ app.applied_at.strftime('%d %b %Y') }}
+            </div>
+
+            <!-- STATUS HISTORY -->
+            {% if app.history %}
+                <div class="mt-2">
+                    <strong>Status History:</strong>
+                    <ul class="small mb-0">
+                        {% for h in app.history %}
+                            <li>
+                                {{ h.old_status or 'N/A' }} → {{ h.new_status }}
+                                ({{ h.changed_at.strftime('%d %b %Y') }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+        </div>
+        {% else %}
+            <p class="text-muted">You have not applied to any drives yet.</p>
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

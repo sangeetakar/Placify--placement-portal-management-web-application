@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block title %}Applications{% endblock %}
+
+{% block content %}
+
+<h3>Applications for {{ drive.job_title }}</h3>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>Student Name</th>
+            <th>Department</th>
+            <th>CGPA</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for app in applications %}
+        <tr>
+            <td>{{ app.student.full_name }}</td>
+            <td>{{ app.student.department }}</td>
+            <td>{{ app.student.cgpa }}</td>
+            <td>
+                <span class="badge bg-secondary">{{ app.status }}</span>
+            </td>
+            <td>
+                <a href="{{ url_for('main.update_application_status',
+                                    application_id=app.application_id,
+                                    status='SHORTLISTED') }}"
+                   class="btn btn-warning btn-sm">Shortlist</a>
+
+                <a href="{{ url_for('main.update_application_status',
+                                    application_id=app.application_id,
+                                    status='SELECTED') }}"
+                   class="btn btn-success btn-sm">Select</a>
+
+                <a href="{{ url_for('main.update_application_status',
+                                    application_id=app.application_id,
+                                    status='REJECTED') }}"
+                   class="btn btn-danger btn-sm">Reject</a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">No applications yet</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
