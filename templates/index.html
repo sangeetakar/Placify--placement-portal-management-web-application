@@ -4,168 +4,94 @@
 
 {% block content %}
 
-<!-- HERO -->
+<!-- HERO SECTION -->
 <div class="row justify-content-center">
-  <div class="col-12 col-lg-10">
-    <div class="p-4 p-md-5 section-bg shadow-sm">
-      <div class="row align-items-center g-4">
-        <div class="col-12 col-lg-7">
-          <span class="badge text-bg-light border" style="color: var(--primary-purple); border-color: rgba(111,66,193,0.25) !important;">
-            Campus Placement Management
-          </span>
+  <div class="col-12 col-lg-8">
 
-          <h1 class="display-6 fw-bold mt-3 mb-2" style="color: var(--dark-purple);">
-            Welcome to Placify
-          </h1>
+    <div class="card border-0 shadow-sm section-bg text-center p-5">
 
-          <p class="lead text-muted mb-4">
-            A role-based portal where <b>Students</b> apply to placement drives, <b>Companies</b> manage applicants,
-            and <b>Admin</b> controls approvals and blacklisting — all in one place.
-          </p>
+      <h1 class="display-6 fw-bold mb-3" style="color: var(--dark-purple);">
+        Welcome to Placify
+      </h1>
 
-          <div class="d-flex flex-column flex-sm-row gap-2">
-            <a class="btn btn-primary btn-lg px-4" href="{{ url_for('main.login') }}">
-              Login
-            </a>
-            <a class="btn btn-outline-dark btn-lg px-4" href="{{ url_for('main.studentregister') }}">
-              Register as Student
-            </a>
-            <a class="btn btn-outline-dark btn-lg px-4" href="{{ url_for('main.companyregister') }}">
-              Register as Company
-            </a>
-          </div>
+      <p class="lead text-muted mb-4">
+        A smart campus placement portal connecting Students, Companies, and Admin
+        in one streamlined system.
+      </p>
 
-          <p class="text-muted small mt-3 mb-0">
-            Note: Student/Company accounts require <b>Admin approval</b> before login.
-          </p>
-        </div>
+      <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+        <a class="btn btn-primary btn-lg px-4"
+           href="{{ url_for('main.login') }}">
+          Login
+        </a>
 
-        <div class="col-12 col-lg-5">
-          <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-              <h2 class="h6 text-uppercase text-muted mb-3">Quick Highlights</h2>
+        <a class="btn btn-outline-dark btn-lg px-4"
+           href="{{ url_for('main.studentregister') }}">
+          Student Register
+        </a>
 
-              <div class="d-flex gap-3 mb-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center"
-                     style="width: 42px; height: 42px; background: rgba(111,66,193,0.12); color: var(--primary-purple); font-weight: 700;">
-                  A
-                </div>
-                <div>
-                  <div class="fw-semibold">Admin Control</div>
-                  <div class="text-muted small">Approvals, blacklisting, drive completion.</div>
-                </div>
-              </div>
-
-              <div class="d-flex gap-3 mb-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center"
-                     style="width: 42px; height: 42px; background: rgba(111,66,193,0.12); color: var(--primary-purple); font-weight: 700;">
-                  C
-                </div>
-                <div>
-                  <div class="fw-semibold">Company Drives</div>
-                  <div class="text-muted small">Create drives, view applicants, shortlist/select.</div>
-                </div>
-              </div>
-
-              <div class="d-flex gap-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center"
-                     style="width: 42px; height: 42px; background: rgba(111,66,193,0.12); color: var(--primary-purple); font-weight: 700;">
-                  S
-                </div>
-                <div>
-                  <div class="fw-semibold">Student Journey</div>
-                  <div class="text-muted small">Apply once per drive, track status & history.</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
+        <a class="btn btn-outline-dark btn-lg px-4"
+           href="{{ url_for('main.companyregister') }}">
+          Company Register
+        </a>
       </div>
+
+      <p class="text-muted small mt-4 mb-0">
+        Note: Accounts require Admin approval before login.
+      </p>
+
     </div>
+
   </div>
 </div>
 
 <!-- FEATURES -->
 <div class="row justify-content-center mt-5">
   <div class="col-12 col-lg-10">
-    <div class="text-center mb-4">
-      <h2 class="h4 fw-bold" style="color: var(--dark-purple);">Why Placify?</h2>
-      <p class="text-muted mb-0">Designed to make placements simpler, faster, and more transparent.</p>
-    </div>
 
-    <div class="row g-3">
-      <div class="col-12 col-md-4">
+    <div class="row g-4 text-center">
+
+      <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body p-4">
-            <div class="fw-bold mb-2" style="color: var(--primary-purple);">Role-Based Access</div>
-            <p class="text-muted mb-0">Separate dashboards for Admin, Company and Student with the right controls.</p>
+            <h5 class="fw-bold mb-2" style="color: var(--primary-purple);">
+              Role-Based Access
+            </h5>
+            <p class="text-muted mb-0">
+              Separate dashboards for Admin, Company, and Student.
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="col-12 col-md-4">
+      <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body p-4">
-            <div class="fw-bold mb-2" style="color: var(--primary-purple);">Approval Workflow</div>
-            <p class="text-muted mb-0">Admin approves students, companies, and placement drives for clean governance.</p>
+            <h5 class="fw-bold mb-2" style="color: var(--primary-purple);">
+              Approval Workflow
+            </h5>
+            <p class="text-muted mb-0">
+              Admin approves users and placement drives.
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="col-12 col-md-4">
+      <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-body p-4">
-            <div class="fw-bold mb-2" style="color: var(--primary-purple);">Application Tracking</div>
-            <p class="text-muted mb-0">Students track status while companies update shortlist/selection decisions.</p>
+            <h5 class="fw-bold mb-2" style="color: var(--primary-purple);">
+              Application Tracking
+            </h5>
+            <p class="text-muted mb-0">
+              Students track applications. Companies manage applicants.
+            </p>
           </div>
         </div>
       </div>
+
     </div>
 
-  </div>
-</div>
-
-<!-- HOW IT WORKS -->
-<div class="row justify-content-center mt-5">
-  <div class="col-12 col-lg-10">
-    <div class="card border-0 shadow-sm">
-      <div class="card-body p-4 p-md-5">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-          <h2 class="h5 fw-bold mb-0" style="color: var(--dark-purple);">How it works</h2>
-          <span class="text-muted small">Simple 3-step flow</span>
-        </div>
-
-        <div class="row g-3 mt-3">
-          <div class="col-12 col-md-4">
-            <div class="p-3 section-bg h-100">
-              <div class="fw-semibold mb-1">1) Register</div>
-              <div class="text-muted small">Student/Company creates an account and submits details.</div>
-            </div>
-          </div>
-
-          <div class="col-12 col-md-4">
-            <div class="p-3 section-bg h-100">
-              <div class="fw-semibold mb-1">2) Admin Approves</div>
-              <div class="text-muted small">Admin reviews and approves users and drives.</div>
-            </div>
-          </div>
-
-          <div class="col-12 col-md-4">
-            <div class="p-3 section-bg h-100">
-              <div class="fw-semibold mb-1">3) Apply & Manage</div>
-              <div class="text-muted small">Students apply; companies shortlist/select; drives can be closed.</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="text-center mt-4">
-          <a class="btn btn-primary btn-lg px-4" href="{{ url_for('main.login') }}">Get Started</a>
-        </div>
-
-      </div>
-    </div>
   </div>
 </div>
 

@@ -24,5 +24,6 @@ with app.app_context():
 from routes import bp
 app.register_blueprint(bp)
 
+
 if __name__=='__main__':
     app.run(debug=True) #we can see the error in the browser as well
