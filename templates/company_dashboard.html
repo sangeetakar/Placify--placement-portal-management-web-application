@@ -27,7 +27,14 @@
         <div class="border rounded p-3 mb-3">
             <h6>{{ drive.job_title }}</h6>
             <p class="mb-1"><strong>Status:</strong> {{ drive.drive_status }}</p>
-            <p class="mb-2"><strong>Active:</strong> {{ drive.is_active }}</p>
+            <p class="mb-2">
+                <strong>Active:</strong>
+                {% if drive.is_active == 1 %}
+                    <span class="badge bg-success">Yes</span>
+                {% else %}
+                    <span class="badge bg-secondary">No</span>
+                {% endif %}
+            </p>
 
             <a href="{{ url_for('main.view_applications', drive_id=drive.drive_id) }}"
                class="btn btn-sm btn-outline-primary">View Applications</a>

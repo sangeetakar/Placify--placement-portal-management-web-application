@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+{% block title %}Drive Details{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- ================= DRIVE INFORMATION ================= -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h4 class="mb-0">{{ drive.job_title }}</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p>
+                        <strong>Company:</strong><br>
+                        {{ drive.company.company_name }}
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <p>
+                        <strong>Status:</strong><br>
+
+                        {% if drive.drive_status == 'APPROVED' %}
+                            <span class="badge bg-success fs-6">Approved</span>
+                        {% elif drive.drive_status == 'PENDING' %}
+                            <span class="badge bg-warning text-dark fs-6">Pending</span>
+                        {% elif drive.drive_status == 'REJECTED' %}
+                            <span class="badge bg-danger fs-6">Rejected</span>
+                        {% elif drive.drive_status == 'CLOSED' %}
+                            <span class="badge bg-secondary fs-6">Closed</span>
+                        {% else %}
+                            {{ drive.drive_status }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <strong>Description:</strong>
+                <div class="mt-2 text-muted">
+                    {{ drive.job_description or "No description provided." }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <strong>Eligibility Criteria:</strong>
+                <div class="mt-2 text-muted">
+                    {{ drive.eligibility_criteria or "Not specified." }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <strong>Application Deadline:</strong><br>
+                {% if drive.application_deadline %}
+                    {{ drive.application_deadline.strftime('%d %b %Y') }}
+                {% else %}
+                    <span class="text-muted">Not specified</span>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ================= APPLICATION STATS ================= -->
+    <!-- ================= APPLICATION STATS ================= -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Application Statistics</h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row text-center g-3">
+
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    <h6>Total Applicants</h6>
+                    <h4 class="text-primary">{{ total_applicants }}</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    <h6>Shortlisted</h6>
+                    <h4 class="text-warning">{{ shortlisted }}</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    <h6>Selected</h6>
+                    <h4 class="text-success">{{ selected }}</h4>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    <h6>Rejected</h6>
+                    <h4 class="text-danger">{{ rejected }}</h4>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+</div>
+
+{% endblock %}

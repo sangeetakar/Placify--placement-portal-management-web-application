@@ -30,7 +30,7 @@
             {% endif %}
           {% endwith %}
 
-          <form method="POST" class="needs-validation" novalidate>
+          <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
 
             <div class="row g-3">
               <div class="col-12">
@@ -87,6 +87,11 @@
               <div class="col-md-3">
                 <label class="form-label" for="graduation_year">Graduation Year</label>
                 <input class="form-control" type="text" name="graduation_year" id="graduation_year" placeholder="e.g. 2026">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label" for="resume">Upload Resume (PDF only)</label>
+                <input class="form-control" type="file" name="resume" id="resume" accept=".pdf">
               </div>
 
               <div class="col-12 mt-3">

@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %}Placement History{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Your Placement History</h2>
+
+<style>
+.scroll-box {
+    max-height: 400px;
+    overflow-y: auto;
+}
+</style>
+
+<div class="card shadow-sm">
+    <div class="card-body scroll-box">
+
+        <table class="table table-sm table-bordered">
+            <tr>
+                <th>Drive</th>
+                <th>Company</th>
+                <th>Current Status</th>
+                <th>Status History</th>
+            </tr>
+
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.drive.job_title }}</td>
+                <td>{{ app.drive.company.company_name }}</td>
+
+                <td>
+                    <span class="badge bg-secondary">
+                        {{ app.status }}
+                    </span>
+                </td>
+
+                <td>
+                    {% if app.history %}
+                        <ul class="small mb-0">
+                            {% for h in app.history %}
+                                <li>
+                                    {{ h.old_status or "N/A" }}
+                                    →
+                                    {{ h.new_status }}
+                                    ({{ h.changed_at.strftime('%d %b %Y') }})
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        No history
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No applications found</td>
+            </tr>
+            {% endfor %}
+
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

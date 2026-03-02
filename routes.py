@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from datetime import datetime
+from sqlalchemy import or_
 
 from models import (
     db,
@@ -142,6 +143,37 @@ def studentregister():
         cgpa = request.form.get("cgpa")
         graduation_year = request.form.get("graduation_year")
 
+        # ================= Resume Upload =================
+        from werkzeug.utils import secure_filename
+        import uuid
+        import os
+
+        resume_filename = None
+        file = request.files.get("resume")
+
+        if file and file.filename != "":
+            if file.filename.lower().endswith(".pdf"):
+
+                unique_filename = f"student_{uuid.uuid4().hex}.pdf"
+                save_path = os.path.join(
+                    request.environ.get("werkzeug.server.shutdown") and "" or 
+                    __import__("flask").current_app.config["UPLOAD_FOLDER"],
+                    unique_filename
+                )
+
+                # Simpler version (recommended):
+                save_path = os.path.join(
+                    __import__("flask").current_app.config["UPLOAD_FOLDER"],
+                    unique_filename
+                )
+
+                file.save(save_path)
+                resume_filename = unique_filename
+
+            else:
+                flash("Only PDF files allowed.", "error")
+                return render_template("studentregister.html")
+
         # Prevent duplicate username
         if User.query.filter_by(username=username).first():
             flash("Username already exists.", "error")
@@ -167,6 +199,7 @@ def studentregister():
             graduation_year=graduation_year_value,
             approval_status=APPROVAL_PENDING,
             is_blacklisted=0,
+            resume_filename=resume_filename
         )
 
         db.session.add(student)
@@ -184,22 +217,37 @@ def studentregister():
 @bp.route("/companyregister", methods=["GET", "POST"])
 def companyregister():
     if request.method == "POST":
+
         username = request.form.get("username").strip()
         password = request.form.get("password")
         company_name = request.form.get("company_name").strip()
+
+        website = request.form.get("website")
+        hr_email = request.form.get("hr_email")
+        hr_phone = request.form.get("hr_phone")
 
         if User.query.filter_by(username=username).first():
             flash("Username already exists.", "error")
             return render_template("companyregister.html")
 
-        user = User(username=username, role=ROLE_COMPANY, is_active=1)
+        # Create user
+        user = User(
+            username=username,
+            role=ROLE_COMPANY,
+            is_active=1
+        )
         user.set_password(password)
-        db.session.add(user)
-        db.session.flush()
 
+        db.session.add(user)
+        db.session.flush()  # Important to get user_id
+
+        # Create company profile
         company = Company(
             user_id=user.user_id,
             company_name=company_name,
+            website=website,
+            hr_email=hr_email,
+            hr_phone=hr_phone,
             approval_status=APPROVAL_PENDING,
             is_blacklisted=0,
         )
@@ -669,6 +717,34 @@ def admin_dashboard():
     if not _require_login(ROLE_ADMIN):
         return redirect(url_for("main.login"))
 
+    # ================= SEARCH =================
+    search_type = request.args.get("type")
+    keyword = request.args.get("keyword")
+
+    search_results = []
+
+    if search_type and keyword:
+        keyword = keyword.strip()
+
+        if search_type == "student":
+            conditions = [
+                Student.full_name.ilike(f"%{keyword}%"),
+                Student.email.ilike(f"%{keyword}%"),
+                Student.phone.ilike(f"%{keyword}%")
+            ]
+
+            if keyword.isdigit():
+                conditions.append(Student.student_id == int(keyword))
+
+            search_results = Student.query.filter(
+                or_(*conditions)
+            ).all()
+
+        elif search_type == "company":
+            search_results = Company.query.filter(
+                Company.company_name.ilike(f"%{keyword}%")
+            ).all()
+
     # ================= COUNTS =================
     total_students = Student.query.count()
     total_companies = Company.query.count()
@@ -702,27 +778,28 @@ def admin_dashboard():
     ).all()
 
     # ================= ACTIVE =================
-    active_students = Student.query.filter_by(
-        approval_status=APPROVAL_APPROVED,
-        is_blacklisted=0
+    active_students = Student.query.filter(
+        Student.approval_status == APPROVAL_APPROVED,
+        Student.is_blacklisted == 0
     ).all()
 
-    blacklisted_students = Student.query.filter_by(
-        is_blacklisted=1
+    blacklisted_students = Student.query.filter(
+        Student.is_blacklisted == 1
     ).all()
 
-    active_companies = Company.query.filter_by(
-        approval_status=APPROVAL_APPROVED,
-        is_blacklisted=0
+    active_companies = Company.query.filter(
+        Company.approval_status == APPROVAL_APPROVED,
+        Company.is_blacklisted == 0
     ).all()
 
-    blacklisted_companies = Company.query.filter_by(
-        is_blacklisted=1
+    blacklisted_companies = Company.query.filter(
+        Company.is_blacklisted == 1
     ).all()
 
-    active_drives = PlacementDrive.query.filter_by(
-        drive_status=DRIVE_APPROVED,
-        is_active=1
+    # ================= DRIVES =================
+    active_drives = PlacementDrive.query.filter(
+        PlacementDrive.drive_status == DRIVE_APPROVED,
+        PlacementDrive.is_active == 1
     ).all()
 
     all_drives = PlacementDrive.query.order_by(
@@ -733,8 +810,40 @@ def admin_dashboard():
         Application.application_id.desc()
     ).all()
 
+    # ================= COMPANY STATS =================
+    active_company_stats = []
+    blacklisted_company_stats = []
+
+    approved_companies = Company.query.filter(
+        Company.approval_status == APPROVAL_APPROVED
+    ).all()
+
+    for company in approved_companies:
+
+        total_company_drives = len(company.drives)
+
+        total_company_applications = sum(
+            len(drive.applications) for drive in company.drives
+        )
+
+        data = {
+            "company": company,
+            "total_drives": total_company_drives,
+            "total_applications": total_company_applications
+        }
+
+        if company.is_blacklisted == 1:
+            blacklisted_company_stats.append(data)
+        else:
+            active_company_stats.append(data)
+
     return render_template(
         "admin_dashboard.html",
+
+        # SEARCH
+        search_results=search_results,
+        search_type=search_type,
+        keyword=keyword,
 
         # COUNTS
         total_students=total_students,
@@ -757,7 +866,209 @@ def admin_dashboard():
         blacklisted_students=blacklisted_students,
         active_companies=active_companies,
         blacklisted_companies=blacklisted_companies,
+
+        # DRIVES
         active_drives=active_drives,
         all_drives=all_drives,
         all_applications=all_applications,
+
+        active_company_stats=active_company_stats,
+        blacklisted_company_stats=blacklisted_company_stats,
+    )
+# -------------------
+# Student Details
+# -------------------
+@bp.route("/student/<int:student_id>/details")
+def student_details(student_id):
+
+    student = Student.query.get_or_404(student_id)
+
+    # ADMIN can view anyone
+    if session.get("role") == ROLE_ADMIN:
+        pass
+
+    # STUDENT can view only self
+    elif session.get("role") == ROLE_STUDENT:
+        current_student = Student.query.filter_by(
+            user_id=session["user_id"]
+        ).first()
+
+        if current_student.student_id != student_id:
+            flash("Unauthorized access.", "error")
+            return redirect(url_for("main.student_dashboard"))
+
+    # COMPANY can view only if student applied to their drive
+    elif session.get("role") == ROLE_COMPANY:
+        company = Company.query.filter_by(
+            user_id=session["user_id"]
+        ).first()
+
+        allowed = Application.query.join(PlacementDrive).filter(
+            Application.student_id == student_id,
+            PlacementDrive.company_id == company.company_id
+        ).first()
+
+        if not allowed:
+            flash("Unauthorized access.", "error")
+            return redirect(url_for("main.company_dashboard"))
+    else:
+        return redirect(url_for("main.login"))
+
+    return render_template("student_details.html", student=student)
+
+# -------------------
+# Company Details
+# -------------------
+@bp.route("/company/<int:company_id>/details")
+def company_details(company_id):
+
+    company = Company.query.get_or_404(company_id)
+    role = session.get("role")
+
+    if role == ROLE_ADMIN:
+        pass
+
+    elif role == ROLE_COMPANY:
+        if session.get("user_id") != company.user_id:
+            flash("Unauthorized access.", "error")
+            return redirect(url_for("main.company_dashboard"))
+    else:
+        flash("Unauthorized access.", "error")
+        return redirect(url_for("main.login"))
+
+    return render_template("company_details.html", company=company)
+# -------------------
+# Drive Details
+# -------------------
+@bp.route("/drive/<int:drive_id>/details")
+def drive_details(drive_id):
+
+    drive = PlacementDrive.query.get_or_404(drive_id)
+
+    total_applicants = Application.query.filter_by(
+        drive_id=drive_id
+    ).count()
+
+    shortlisted = Application.query.filter_by(
+        drive_id=drive_id,
+        status="SHORTLISTED"
+    ).count()
+
+    selected = Application.query.filter_by(
+        drive_id=drive_id,
+        status="SELECTED"
+    ).count()
+
+    rejected = Application.query.filter_by(
+        drive_id=drive_id,
+        status="REJECTED"
+    ).count()
+
+    return render_template(
+        "drive_details.html",
+        drive=drive,
+        total_applicants=total_applicants,
+        shortlisted=shortlisted,
+        selected=selected,
+        rejected=rejected
+    )
+
+@bp.route("/admin/history")
+def admin_history():
+    if not _require_login(ROLE_ADMIN):
+        return redirect(url_for("main.login"))
+
+    # ================= STUDENT APPLICATION HISTORY =================
+    all_status_history = ApplicationStatusHistory.query.order_by(
+        ApplicationStatusHistory.changed_at.desc()
+    ).all()
+
+    # ================= PAST (NON-ACTIVE) DRIVES =================
+    past_drives = PlacementDrive.query.filter_by(
+        is_active=0
+    ).order_by(
+        PlacementDrive.drive_id.desc()
+    ).all()
+
+    return render_template(
+        "admin_history.html",
+        all_status_history=all_status_history,
+        past_drives=past_drives
+    )
+
+@bp.route("/student/history")
+def student_history():
+    if not _require_login(ROLE_STUDENT):
+        return redirect(url_for("main.login"))
+
+    student = Student.query.filter_by(
+        user_id=session["user_id"]
+    ).first()
+
+    applications = Application.query.filter_by(
+        student_id=student.student_id
+    ).order_by(
+        Application.application_id.desc()
+    ).all()
+
+    return render_template(
+        "student_history.html",
+        student=student,
+        applications=applications
+    )
+
+@bp.route("/student/edit", methods=["GET", "POST"])
+def edit_student_profile():
+    if not _require_login(ROLE_STUDENT):
+        return redirect(url_for("main.login"))
+
+    student = Student.query.filter_by(
+        user_id=session["user_id"]
+    ).first()
+
+    if request.method == "POST":
+        student.full_name = request.form.get("full_name")
+        student.email = request.form.get("email")
+        student.phone = request.form.get("phone")
+        student.department = request.form.get("department")
+        student.degree = request.form.get("degree")
+
+        # Resume re-upload
+        file = request.files.get("resume")
+        if file and file.filename:
+            import uuid, os
+            ext = file.filename.split(".")[-1]
+            filename = f"student_{uuid.uuid4().hex}.{ext}"
+            path = os.path.join("static/resumes", filename)
+            file.save(path)
+            student.resume_filename = filename
+
+        db.session.commit()
+        flash("Profile updated successfully.", "success")
+        return redirect(url_for("main.student_dashboard"))
+
+    return render_template("edit_student.html", student=student)
+
+@bp.route("/admin/rejected")
+def admin_rejected():
+    if not _require_login(ROLE_ADMIN):
+        return redirect(url_for("main.login"))
+
+    rejected_students = Student.query.filter_by(
+        approval_status=APPROVAL_REJECTED
+    ).all()
+
+    rejected_companies = Company.query.filter_by(
+        approval_status=APPROVAL_REJECTED
+    ).all()
+
+    rejected_drives = PlacementDrive.query.filter_by(
+        drive_status=DRIVE_REJECTED
+    ).all()
+
+    return render_template(
+        "admin_rejected.html",
+        rejected_students=rejected_students,
+        rejected_companies=rejected_companies,
+        rejected_drives=rejected_drives
     )

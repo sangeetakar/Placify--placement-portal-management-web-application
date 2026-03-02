@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block title %}Student Details{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h4 class="mb-0">{{ student.full_name }}</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Email:</strong><br>{{ student.email or "Not provided" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Phone:</strong><br>{{ student.phone or "Not provided" }}</p>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Department:</strong><br>{{ student.department or "Not specified" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Degree:</strong><br>{{ student.degree or "Not specified" }}</p>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p>
+                        <strong>CGPA:</strong><br>
+                        <span class="badge bg-primary fs-6">
+                            {{ student.cgpa or "N/A" }}
+                        </span>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <p>
+                        <strong>Graduation Year:</strong><br>
+                        <span class="badge bg-secondary fs-6">
+                            {{ student.graduation_year or "N/A" }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mt-3">
+                <strong>Resume:</strong><br><br>
+
+                {% if student.resume_filename %}
+                    <a href="{{ url_for('static', filename='resumes/' + student.resume_filename) }}"
+                       target="_blank"
+                       class="btn btn-outline-primary">
+                        View Resume
+                    </a>
+                {% else %}
+                    <span class="text-muted">No resume uploaded</span>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

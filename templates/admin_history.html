@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+{% block title %}Admin History • Placify{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Historical Placement Data</h2>
+
+<style>
+.scroll-box {
+    max-height: 350px;
+    overflow-y: auto;
+}
+</style>
+
+
+<!-- ================= STUDENT APPLICATION HISTORY ================= -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-bold">
+        Student Application History
+    </div>
+    <div class="card-body scroll-box">
+
+        <table class="table table-sm table-bordered">
+            <tr>
+                <th>Student</th>
+                <th>Drive</th>
+                <th>Status Change</th>
+                <th>Date</th>
+            </tr>
+
+            {% for h in all_status_history %}
+            <tr>
+                <td>{{ h.application.student.full_name }}</td>
+                <td>{{ h.application.drive.job_title }}</td>
+                <td>
+                    {{ h.old_status or "N/A" }} →
+                    {{ h.new_status }}
+                </td>
+                <td>
+                    {{ h.changed_at.strftime('%d %b %Y') }}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">No history available</td>
+            </tr>
+            {% endfor %}
+
+        </table>
+
+    </div>
+</div>
+
+
+<!-- ================= PAST DRIVES (NON-ACTIVE) ================= -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light fw-bold">
+        Past Placement Drives (Closed / Inactive)
+    </div>
+    <div class="card-body scroll-box">
+
+        <table class="table table-sm table-bordered">
+            <tr>
+                <th>ID</th>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Applicants</th>
+                <th>Details</th>
+            </tr>
+
+            {% for d in past_drives %}
+            <tr>
+                <td>{{ d.drive_id }}</td>
+                <td>{{ d.job_title }}</td>
+                <td>{{ d.company.company_name }}</td>
+                <td>{{ d.drive_status }}</td>
+                <td>{{ d.applications|length }}</td>
+                <td>
+                    <a href="{{ url_for('main.drive_details',
+                                        drive_id=d.drive_id) }}"
+                       class="btn btn-sm btn-outline-info">
+                        Get Details
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">No past drives found</td>
+            </tr>
+            {% endfor %}
+
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

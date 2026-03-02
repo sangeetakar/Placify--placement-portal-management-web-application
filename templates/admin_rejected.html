@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+{% block title %}Rejected Requests • Placify{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4 ">Rejected Requests</h2>
+
+<a href="{{ url_for('main.admin_dashboard') }}"
+   class="btn btn-secondary mb-4">
+   Back to Dashboard
+</a>
+
+<!-- ================= REJECTED STUDENTS ================= -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white fw-bold">
+        Rejected Students
+    </div>
+    <div class="card-body">
+
+        <table class="table table-sm table-bordered">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Details</th>
+            </tr>
+
+            {% for s in rejected_students %}
+            <tr>
+                <td>{{ s.student_id }}</td>
+                <td>{{ s.full_name }}</td>
+                <td>
+                    <a href="{{ url_for('main.student_details',
+                                        student_id=s.student_id) }}"
+                       class="btn btn-sm btn-outline-info">
+                        Get Details
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">No rejected students</td></tr>
+            {% endfor %}
+        </table>
+
+    </div>
+</div>
+
+
+<!-- ================= REJECTED COMPANIES ================= -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white fw-bold">
+        Rejected Companies
+    </div>
+    <div class="card-body">
+
+        <table class="table table-sm table-bordered">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Details</th>
+            </tr>
+
+            {% for c in rejected_companies %}
+            <tr>
+                <td>{{ c.company_id }}</td>
+                <td>{{ c.company_name }}</td>
+                <td>
+                    <a href="{{ url_for('main.company_details',
+                                        company_id=c.company_id) }}"
+                       class="btn btn-sm btn-outline-info">
+                        Get Details
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">No rejected companies</td></tr>
+            {% endfor %}
+        </table>
+
+    </div>
+</div>
+
+
+<!-- ================= REJECTED DRIVES ================= -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white fw-bold">
+        Rejected Drives
+    </div>
+    <div class="card-body">
+
+        <table class="table table-sm table-bordered">
+            <tr>
+                <th>ID</th>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Details</th>
+            </tr>
+
+            {% for d in rejected_drives %}
+            <tr>
+                <td>{{ d.drive_id }}</td>
+                <td>{{ d.job_title }}</td>
+                <td>{{ d.company.company_name }}</td>
+                <td>
+                    <a href="{{ url_for('main.drive_details',
+                                        drive_id=d.drive_id) }}"
+                       class="btn btn-sm btn-outline-info">
+                        Get Details
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No rejected drives</td></tr>
+            {% endfor %}
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -5,13 +5,14 @@
 
 <h3>Applications for {{ drive.job_title }}</h3>
 
-<table class="table table-bordered mt-3">
-    <thead>
+<table class="table table-bordered table-hover mt-3">
+    <thead class="table-light">
         <tr>
             <th>Student Name</th>
             <th>Department</th>
             <th>CGPA</th>
             <th>Status</th>
+            <th>Details</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -19,32 +20,72 @@
     <tbody>
         {% for app in applications %}
         <tr>
+
+            <!-- STUDENT NAME -->
             <td>{{ app.student.full_name }}</td>
+
+            <!-- DEPARTMENT -->
             <td>{{ app.student.department }}</td>
+
+            <!-- CGPA -->
             <td>{{ app.student.cgpa }}</td>
-            <td>
-                <span class="badge bg-secondary">{{ app.status }}</span>
-            </td>
-            <td>
-                <a href="{{ url_for('main.update_application_status',
-                                    application_id=app.application_id,
-                                    status='SHORTLISTED') }}"
-                   class="btn btn-warning btn-sm">Shortlist</a>
 
-                <a href="{{ url_for('main.update_application_status',
-                                    application_id=app.application_id,
-                                    status='SELECTED') }}"
-                   class="btn btn-success btn-sm">Select</a>
-
-                <a href="{{ url_for('main.update_application_status',
-                                    application_id=app.application_id,
-                                    status='REJECTED') }}"
-                   class="btn btn-danger btn-sm">Reject</a>
+            <!-- STATUS BADGE -->
+            <td>
+                {% if app.status == 'APPLIED' %}
+                    <span class="badge bg-secondary">Applied</span>
+                {% elif app.status == 'SHORTLISTED' %}
+                    <span class="badge bg-warning text-dark">Shortlisted</span>
+                {% elif app.status == 'SELECTED' %}
+                    <span class="badge bg-success">Selected</span>
+                {% elif app.status == 'REJECTED' %}
+                    <span class="badge bg-danger">Rejected</span>
+                {% endif %}
             </td>
+
+            <!-- GET DETAILS -->
+            <td>
+                <a href="{{ url_for('main.student_details',
+                                    student_id=app.student.student_id) }}"
+                   class="btn btn-outline-info btn-sm">
+                    Get Details
+                </a>
+            </td>
+
+            <!-- ACTION BUTTONS -->
+            <td>
+                {% if app.status in ['SELECTED', 'REJECTED'] %}
+                    <span class="text-muted small">Finalized</span>
+                {% else %}
+                    <a href="{{ url_for('main.update_application_status',
+                                        application_id=app.application_id,
+                                        status='SHORTLISTED') }}"
+                       class="btn btn-warning btn-sm mb-1">
+                        Shortlist
+                    </a>
+
+                    <a href="{{ url_for('main.update_application_status',
+                                        application_id=app.application_id,
+                                        status='SELECTED') }}"
+                       class="btn btn-success btn-sm mb-1">
+                        Select
+                    </a>
+
+                    <a href="{{ url_for('main.update_application_status',
+                                        application_id=app.application_id,
+                                        status='REJECTED') }}"
+                       class="btn btn-danger btn-sm">
+                        Reject
+                    </a>
+                {% endif %}
+            </td>
+
         </tr>
         {% else %}
         <tr>
-            <td colspan="5">No applications yet</td>
+            <td colspan="6" class="text-center text-muted">
+                No applications yet
+            </td>
         </tr>
         {% endfor %}
     </tbody>

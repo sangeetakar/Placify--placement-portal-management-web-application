@@ -3,6 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
+import os
+
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'resumes')
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  
+
 # -----------------------------
 # Load Configuration
 # -----------------------------

@@ -1,0 +1,156 @@
+{% extends "layout.html" %}
+{% block title %}Placify | Company Details{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+
+      <!-- ================= COMPANY PROFILE ================= -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+          <h4 class="mb-3">{{ company.company_name }}</h4>
+          <hr>
+
+          <div class="row g-4">
+
+            <!-- LEFT COLUMN -->
+            <div class="col-md-6">
+
+              <p>
+                <strong>Username:</strong><br>
+                {{ company.user.username }}
+              </p>
+
+              <p>
+                <strong>Website:</strong><br>
+                {% if company.website %}
+                  <a href="{{ company.website }}" target="_blank">
+                    {{ company.website }}
+                  </a>
+                {% else %}
+                  -
+                {% endif %}
+              </p>
+
+              <p>
+                <strong>HR Email:</strong><br>
+                {{ company.hr_email or '-' }}
+              </p>
+
+              <p>
+                <strong>HR Phone:</strong><br>
+                {{ company.hr_phone or '-' }}
+              </p>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="col-md-6">
+
+              <p>
+                <strong>Approval Status:</strong><br>
+                {% if company.approval_status == 'APPROVED' %}
+                  <span class="badge bg-success fs-6">Approved</span>
+                {% elif company.approval_status == 'PENDING' %}
+                  <span class="badge bg-warning text-dark fs-6">Pending</span>
+                {% elif company.approval_status == 'REJECTED' %}
+                  <span class="badge bg-danger fs-6">Rejected</span>
+                {% else %}
+                  {{ company.approval_status }}
+                {% endif %}
+              </p>
+
+              <p>
+                <strong>Blacklisted:</strong><br>
+                {% if company.is_blacklisted == 1 %}
+                  <span class="badge bg-danger fs-6">Yes</span>
+                {% else %}
+                  <span class="badge bg-success fs-6">No</span>
+                {% endif %}
+              </p>
+
+              <p>
+                <strong>Registered On:</strong><br>
+                {{ company.user.created_at.strftime('%d %b %Y') }}
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ================= DRIVES CREATED ================= -->
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+          <h5 class="mb-3">Drives Created</h5>
+
+          {% if company.drives %}
+
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Job Title</th>
+                  <th>Status</th>
+                  <th>Deadline</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                {% for drive in company.drives %}
+                <tr>
+                  <td>{{ drive.job_title }}</td>
+
+                  <td>
+                    {% if drive.drive_status == 'APPROVED' %}
+                      <span class="badge bg-success">Approved</span>
+                    {% elif drive.drive_status == 'PENDING' %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif drive.drive_status == 'REJECTED' %}
+                      <span class="badge bg-danger">Rejected</span>
+                    {% elif drive.drive_status == 'CLOSED' %}
+                      <span class="badge bg-secondary">Closed</span>
+                    {% else %}
+                      {{ drive.drive_status }}
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if drive.application_deadline %}
+                      {{ drive.application_deadline.strftime('%d %b %Y') }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    <a href="{{ url_for('main.drive_details', drive_id=drive.drive_id) }}"
+                       class="btn btn-sm btn-outline-primary">
+                      View
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+
+              </tbody>
+            </table>
+          </div>
+
+          {% else %}
+            <p class="text-muted">No drives created yet.</p>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
