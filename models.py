@@ -6,9 +6,6 @@ from sqlalchemy import event
 db = SQLAlchemy()
 
 
-# -----------------------------
-# Constants (kept simple)
-# -----------------------------
 ROLE_ADMIN = "ADMIN"
 ROLE_COMPANY = "COMPANY"
 ROLE_STUDENT = "STUDENT"
@@ -29,9 +26,8 @@ APP_REJECTED = "REJECTED"
 APP_WITHDRAWN = "WITHDRAWN"
 
 
-# -----------------------------
-# Models
-# -----------------------------
+
+
 class User(db.Model):
     __tablename__ = "users"
 
@@ -47,7 +43,6 @@ class User(db.Model):
 
     is_active = db.Column(db.Integer, nullable=False, default=1)
 
-    # Minimal but useful timestamps
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
 
@@ -56,7 +51,6 @@ class User(db.Model):
         db.CheckConstraint("is_active IN (0,1)", name="ck_users_is_active"),
     )
 
-    # Relationships (1-1 profiles)
     company_profile = db.relationship("Company", back_populates="user", uselist=False)
     student_profile = db.relationship("Student", back_populates="user", uselist=False)
 
@@ -147,7 +141,6 @@ class PlacementDrive(db.Model):
 
     drive_status = db.Column(db.String(20), nullable=False, default=DRIVE_PENDING)
 
-    # If company is blacklisted -> set is_active=0 for all its drives
     is_active = db.Column(db.Integer, nullable=False, default=1)
 
     __table_args__ = (
@@ -177,8 +170,8 @@ class Application(db.Model):
     status = db.Column(db.String(20), nullable=False, default=APP_APPLIED)
     remark = db.Column(db.Text, nullable=True)
 
-    __table_args__ = (
-        # Prevent multiple applications by same student to same drive
+    __table_args__ = (# prevent multiple applications by same student to same drive
+        
         db.UniqueConstraint("student_id", "drive_id", name="uq_applications_student_drive"),
         db.CheckConstraint(
             status.in_([APP_APPLIED, APP_SHORTLISTED, APP_SELECTED, APP_REJECTED, APP_WITHDRAWN]),
@@ -231,8 +224,8 @@ class AdminAction(db.Model):
     action_id = db.Column(db.Integer, primary_key=True)
     admin_user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), nullable=False)
 
-    action_type = db.Column(db.String(50), nullable=False)  # e.g. APPROVE_COMPANY, BLACKLIST_STUDENT
-    target_type = db.Column(db.String(30), nullable=False)  # COMPANY/STUDENT/DRIVE
+    action_type = db.Column(db.String(50), nullable=False)  
+    target_type = db.Column(db.String(30), nullable=False)  
     target_id = db.Column(db.Integer, nullable=False)
 
     action_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
@@ -243,10 +236,9 @@ class AdminAction(db.Model):
         return f"<AdminAction {self.action_id} {self.action_type} {self.target_type}:{self.target_id}>"
 
 
-# -----------------------------
-# Business rule enforcement
-# Company blacklist => drives inactive
-# -----------------------------
+
+# drives become inactive when company blacklisted
+
 @event.listens_for(Company, "after_update")
 def company_blacklist_cascade(mapper, connection, target: Company):
     """
@@ -262,14 +254,10 @@ def company_blacklist_cascade(mapper, connection, target: Company):
         )
 
 
-# -----------------------------
-# Optional helper: create all tables
-# Call this once from a setup script / flask shell.
-# -----------------------------
+
 def init_db():
     db.create_all()
 
-    # Check if admin already exists
     existing_admin = User.query.filter_by(role=ROLE_ADMIN).first()
 
     if not existing_admin:

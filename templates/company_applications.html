@@ -21,16 +21,12 @@
         {% for app in applications %}
         <tr>
 
-            <!-- STUDENT NAME -->
             <td>{{ app.student.full_name }}</td>
 
-            <!-- DEPARTMENT -->
             <td>{{ app.student.department }}</td>
 
-            <!-- CGPA -->
             <td>{{ app.student.cgpa }}</td>
 
-            <!-- STATUS BADGE -->
             <td>
                 {% if app.status == 'APPLIED' %}
                     <span class="badge bg-secondary">Applied</span>
@@ -43,7 +39,6 @@
                 {% endif %}
             </td>
 
-            <!-- GET DETAILS -->
             <td>
                 <a href="{{ url_for('main.student_details',
                                     student_id=app.student.student_id) }}"
@@ -52,7 +47,6 @@
                 </a>
             </td>
 
-            <!-- ACTION BUTTONS -->
             <td>
                 {% if app.status in ['SELECTED', 'REJECTED'] %}
                     <span class="text-muted small">Finalized</span>

@@ -26,24 +26,18 @@ from models import (
 bp = Blueprint("main", __name__)
 
 
-# -------------------
-# Helper
-# -------------------
+
 def _require_login(role: str):
     return session.get("user_id") and session.get("role") == role
 
 
-# -------------------
-# Landing Page
-# -------------------
+
 @bp.route("/")
 def index():
     return render_template("index.html")
 
 
-# -------------------
-# Login
-# -------------------
+
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -60,7 +54,7 @@ def login():
             flash("Your account is inactive.", "error")
             return render_template("login.html")
 
-        # ================= STUDENT =================
+        # student
         if user.role == ROLE_STUDENT:
             student = Student.query.filter_by(user_id=user.user_id).first()
 
@@ -84,7 +78,8 @@ def login():
             session["role"] = user.role
             return redirect(url_for("main.student_dashboard"))
 
-        # ================= COMPANY =================
+        # company
+
         if user.role == ROLE_COMPANY:
             company = Company.query.filter_by(user_id=user.user_id).first()
 
@@ -108,7 +103,7 @@ def login():
             session["role"] = user.role
             return redirect(url_for("main.company_dashboard"))
 
-        # ================= ADMIN =================
+        # admin
         session["user_id"] = user.user_id
         session["role"] = user.role
         return redirect(url_for("main.admin_dashboard"))
@@ -116,9 +111,8 @@ def login():
     return render_template("login.html")
 
 
-# -------------------
-# Logout
-# -------------------
+#logout
+
 @bp.route("/logout")
 def logout():
     session.clear()
@@ -126,9 +120,8 @@ def logout():
     return redirect(url_for("main.login"))
 
 
-# -------------------
-# Student Registration
-# -------------------
+#student register
+
 @bp.route("/studentregister", methods=["GET", "POST"])
 def studentregister():
     if request.method == "POST":
@@ -143,7 +136,7 @@ def studentregister():
         cgpa = request.form.get("cgpa")
         graduation_year = request.form.get("graduation_year")
 
-        # ================= Resume Upload =================
+        # for resume
         from werkzeug.utils import secure_filename
         import uuid
         import os
@@ -174,7 +167,7 @@ def studentregister():
                 flash("Only PDF files allowed.", "error")
                 return render_template("studentregister.html")
 
-        # Prevent duplicate username
+        # prevent duplicate username
         if User.query.filter_by(username=username).first():
             flash("Username already exists.", "error")
             return render_template("studentregister.html")
@@ -211,9 +204,8 @@ def studentregister():
     return render_template("studentregister.html")
 
 
-# -------------------
-# Company Registration
-# -------------------
+#company register
+
 @bp.route("/companyregister", methods=["GET", "POST"])
 def companyregister():
     if request.method == "POST":
@@ -230,7 +222,7 @@ def companyregister():
             flash("Username already exists.", "error")
             return render_template("companyregister.html")
 
-        # Create user
+        # create user
         user = User(
             username=username,
             role=ROLE_COMPANY,
@@ -239,9 +231,9 @@ def companyregister():
         user.set_password(password)
 
         db.session.add(user)
-        db.session.flush()  # Important to get user_id
+        db.session.flush()  # important to get user_id
 
-        # Create company profile
+        # create company profile
         company = Company(
             user_id=user.user_id,
             company_name=company_name,
@@ -261,9 +253,8 @@ def companyregister():
     return render_template("companyregister.html")
 
 
-# -------------------
-# Student Dashboard
-# -------------------
+#student dashboard
+
 @bp.route("/student/dashboard")
 def student_dashboard():
     if not _require_login(ROLE_STUDENT):
@@ -287,10 +278,8 @@ def student_dashboard():
         applications=applications
     )
 
+#company dashboard
 
-# -------------------
-# Company Dashboard
-# -------------------
 @bp.route("/company/dashboard")
 def company_dashboard():
     if not _require_login(ROLE_COMPANY):
@@ -306,9 +295,9 @@ def company_dashboard():
 
     return render_template("company_dashboard.html", company=company, drives=drives)
 
-# -------------------
-# Student Apply
-# -------------------
+
+#for student to apply
+
 @bp.route("/student/apply/<int:drive_id>")
 def apply_drive(drive_id):
     if not _require_login(ROLE_STUDENT):
@@ -320,21 +309,21 @@ def apply_drive(drive_id):
         flash("You are blacklisted.", "error")
         return redirect(url_for("main.student_dashboard"))
 
-    # ✅ FIRST fetch drive
+    # fetch drive
     drive = PlacementDrive.query.get_or_404(drive_id)
 
-    # ✅ Then check status
+    #check status
     if drive.is_active == 0 or drive.drive_status != DRIVE_APPROVED:
         flash("Drive is not active.", "warning")
         return redirect(url_for("main.student_dashboard"))
 
-    # ✅ Deadline check (NOW drive exists)
+    # deadline check
     from datetime import date
     if drive.application_deadline and drive.application_deadline < date.today():
         flash("Application deadline has passed.", "error")
         return redirect(url_for("main.student_dashboard"))
 
-    # ✅ Prevent duplicate application
+    # duplicate application prevent 
     existing = Application.query.filter_by(
         student_id=student.student_id,
         drive_id=drive_id
@@ -357,9 +346,9 @@ def apply_drive(drive_id):
     return redirect(url_for("main.student_dashboard"))
 
 
-# -------------------
-# View Applications (Company)
-# -------------------
+
+# view Applications of students
+
 @bp.route("/company/drive/<int:drive_id>/applications")
 def view_applications(drive_id):
     if not _require_login(ROLE_COMPANY):
@@ -381,9 +370,8 @@ def view_applications(drive_id):
     )
 
 
-# -------------------
-# Update Application Status
-# -------------------
+#update application status
+
 @bp.route("/company/application/<int:application_id>/update/<string:status>")
 def update_application_status(application_id, status):
     if not _require_login(ROLE_COMPANY):
@@ -392,7 +380,7 @@ def update_application_status(application_id, status):
     company = Company.query.filter_by(user_id=session["user_id"]).first()
     application = Application.query.get_or_404(application_id)
 
-    #  SECURITY CHECK — ensure application belongs to this company
+    #  ensure application belongs to this company
     if application.drive.company_id != company.company_id:
         flash("Unauthorized action.", "error")
         return redirect(url_for("main.company_dashboard"))
@@ -406,7 +394,7 @@ def update_application_status(application_id, status):
     old_status = application.status
     application.status = status
 
-    # Add status history
+    # status history
     history = ApplicationStatusHistory(
         application_id=application.application_id,
         old_status=old_status,
@@ -421,9 +409,8 @@ def update_application_status(application_id, status):
     return redirect(request.referrer)
 
 
-# -------------------
-# Company Create Drive
-# -------------------
+# company Create Drive
+
 @bp.route("/company/create_drive", methods=["GET", "POST"])
 def create_drive():
     if not _require_login(ROLE_COMPANY):
@@ -447,7 +434,7 @@ def create_drive():
         eligibility = request.form.get("eligibility")
         deadline_str = request.form.get("deadline")
 
-        # Convert deadline string → Python date
+        # deadline string → Python date
         deadline_value = None
         if deadline_str:
             deadline_value = datetime.strptime(deadline_str, "%Y-%m-%d").date()
@@ -470,9 +457,8 @@ def create_drive():
     return render_template("create_drive.html")
 
 
-# -------------------
-# Close Drive (Company)
-# -------------------
+#closing drive
+
 @bp.route("/company/drive/<int:drive_id>/close")
 def close_drive(drive_id):
     if not _require_login(ROLE_COMPANY):
@@ -481,7 +467,7 @@ def close_drive(drive_id):
     company = Company.query.filter_by(user_id=session["user_id"]).first()
     drive = PlacementDrive.query.get_or_404(drive_id)
 
-    # 🔒 Ensure drive belongs to company
+    # check drive belongs to company
     if drive.company_id != company.company_id:
         flash("Unauthorized action.", "error")
         return redirect(url_for("main.company_dashboard"))
@@ -493,9 +479,10 @@ def close_drive(drive_id):
 
     flash("Drive closed successfully.", "warning")
     return redirect(url_for("main.company_dashboard"))
-# -------------------
-# Admin Approvals
-# -------------------
+
+
+#admin approval
+
 @bp.route("/admin/student/<int:student_id>/approve")
 def approve_student(student_id):
     if not _require_login(ROLE_ADMIN):
@@ -576,9 +563,9 @@ def reject_drive(drive_id):
     return redirect(url_for("main.admin_dashboard"))
 
 
-# -------------------
-# Admin Activate / Deactivate Drive
-# -------------------
+
+# admin Activate / deactivate Drive
+
 @bp.route("/admin/drive/<int:drive_id>/deactivate")
 def deactivate_drive(drive_id):
     if not _require_login(ROLE_ADMIN):
@@ -605,9 +592,9 @@ def activate_drive(drive_id):
     return redirect(url_for("main.admin_dashboard"))
 
 
-# -------------------
-# Blacklist Student (Auto Reject Applications)
-# -------------------
+
+# Blacklist Student + Auto Reject Applications
+
 @bp.route("/admin/blacklist_student/<int:student_id>")
 def blacklist_student(student_id):
     if not _require_login(ROLE_ADMIN):
@@ -632,9 +619,9 @@ def blacklist_student(student_id):
     return redirect(url_for("main.admin_dashboard"))
 
 
-# -------------------
-# Blacklist Company (Deactivate Drives + Reject Applications)
-# -------------------
+
+# blacklist Company (Deactivate Drives + Reject Applications)
+
 @bp.route("/admin/blacklist_company/<int:company_id>")
 def blacklist_company(company_id):
     if not _require_login(ROLE_ADMIN):
@@ -663,9 +650,9 @@ def blacklist_company(company_id):
     return redirect(url_for("main.admin_dashboard"))
 
 
-# -------------------
+
 # Admin Search
-# -------------------
+
 @bp.route("/admin/search")
 def admin_search():
     if not _require_login(ROLE_ADMIN):
@@ -717,7 +704,7 @@ def admin_dashboard():
     if not _require_login(ROLE_ADMIN):
         return redirect(url_for("main.login"))
 
-    # ================= SEARCH =================
+    # SEARCH
     search_type = request.args.get("type")
     keyword = request.args.get("keyword")
 
@@ -745,13 +732,13 @@ def admin_dashboard():
                 Company.company_name.ilike(f"%{keyword}%")
             ).all()
 
-    # ================= COUNTS =================
+    # COUNTS
     total_students = Student.query.count()
     total_companies = Company.query.count()
     total_drives = PlacementDrive.query.count()
     total_applications = Application.query.count()
 
-    # ================= APPROVAL REQUESTS =================
+    #APPROVAL REQUESTS 
     pending_students = Student.query.filter_by(
         approval_status=APPROVAL_PENDING
     ).all()
@@ -764,7 +751,7 @@ def admin_dashboard():
         drive_status=DRIVE_PENDING
     ).all()
 
-    # ================= REJECTED =================
+    # REJECTED
     rejected_students = Student.query.filter_by(
         approval_status=APPROVAL_REJECTED
     ).all()
@@ -777,7 +764,7 @@ def admin_dashboard():
         drive_status=DRIVE_REJECTED
     ).all()
 
-    # ================= ACTIVE =================
+    #ACTIVE
     active_students = Student.query.filter(
         Student.approval_status == APPROVAL_APPROVED,
         Student.is_blacklisted == 0
@@ -796,7 +783,7 @@ def admin_dashboard():
         Company.is_blacklisted == 1
     ).all()
 
-    # ================= DRIVES =================
+    #  DRIVES 
     active_drives = PlacementDrive.query.filter(
         PlacementDrive.drive_status == DRIVE_APPROVED,
         PlacementDrive.is_active == 1
@@ -810,7 +797,7 @@ def admin_dashboard():
         Application.application_id.desc()
     ).all()
 
-    # ================= COMPANY STATS =================
+    # COMPANY STATS 
     active_company_stats = []
     blacklisted_company_stats = []
 
@@ -875,9 +862,8 @@ def admin_dashboard():
         active_company_stats=active_company_stats,
         blacklisted_company_stats=blacklisted_company_stats,
     )
-# -------------------
 # Student Details
-# -------------------
+
 @bp.route("/student/<int:student_id>/details")
 def student_details(student_id):
 
@@ -916,9 +902,9 @@ def student_details(student_id):
 
     return render_template("student_details.html", student=student)
 
-# -------------------
+
 # Company Details
-# -------------------
+
 @bp.route("/company/<int:company_id>/details")
 def company_details(company_id):
 
@@ -937,9 +923,9 @@ def company_details(company_id):
         return redirect(url_for("main.login"))
 
     return render_template("company_details.html", company=company)
-# -------------------
+
 # Drive Details
-# -------------------
+
 @bp.route("/drive/<int:drive_id>/details")
 def drive_details(drive_id):
 
@@ -978,12 +964,12 @@ def admin_history():
     if not _require_login(ROLE_ADMIN):
         return redirect(url_for("main.login"))
 
-    # ================= STUDENT APPLICATION HISTORY =================
+    #  STUDENT APPLICATION HISTORY 
     all_status_history = ApplicationStatusHistory.query.order_by(
         ApplicationStatusHistory.changed_at.desc()
     ).all()
 
-    # ================= PAST (NON-ACTIVE) DRIVES =================
+    #PAST (NON-ACTIVE) DRIVES
     past_drives = PlacementDrive.query.filter_by(
         is_active=0
     ).order_by(
