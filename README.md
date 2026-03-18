@@ -153,7 +153,7 @@ Foreign key constraints ensure relational integrity.
 - Backend validation for:
   - Duplicate applications
   - Drive approval checks
-  - Company approval enforcement
+  - Company approval enforcement  
 
 ---
 
