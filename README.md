@@ -1,3 +1,5 @@
+For demo , please check out this Youtube link : https://www.youtube.com/watch?v=syl3uE62lTY
+
 # 🎓 Placify - Placement Portal Application
 
 A role-based web application built using **Flask, SQLite, Jinja2, and Bootstrap** to manage campus recruitment activities including company approvals, placement drives, and student applications.
